@@ -88,3 +88,31 @@ Each entry records:
 - **Rationale:** Before gameplay systems, we need a clean repo, working dev environment, visible canvas, running loop, and blank scene.
 - **Date:** 2026-03-31
 - **Notes:** This is the first real implementation target after Phase 0 docs are committed.
+
+## D-009 — License
+
+- **Decision:** Use the MIT License.
+- **Status:** Accepted
+- **Rationale:** Keeps the project simple and permissive during its exploratory and educational phase.
+- **Date:** 2026-03-31
+- **Notes:** Licensing can be revisited later if project goals change.
+
+---
+
+## D-010 — ECS Position Refinement
+
+- **Decision:** JARDS Engine will be OOP-first, with selective ECS-inspired patterns introduced only when they solve real problems.
+- **Status:** Accepted
+- **Rationale:** OOP matches current development comfort and keeps the project understandable. ECS ideas may be adopted later where they provide clear architectural or gameplay benefits.
+- **Date:** 2026-03-31
+- **Notes:** ECS will not be forced into the project for ideological reasons.
+
+---
+
+## D-011 — Rendering Scope
+
+- **Decision:** Canvas 2D is sufficient as the long-term rendering target unless future project goals clearly require more.
+- **Status:** Accepted
+- **Rationale:** Canvas 2D supports a large range of fun and technically interesting game experiments without introducing unnecessary rendering complexity.
+- **Date:** 2026-03-31
+- **Notes:** 2.5D visual techniques are explicitly in scope.

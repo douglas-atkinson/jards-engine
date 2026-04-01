@@ -72,7 +72,14 @@ Gameplay objects should begin as lightweight entities with:
 
 ## ECS Position
 
-We are **ECS-aware but not ECS-committed**.
+JARDS Engine is **OOP-first and ECS-aware**.
+
+The engine will begin with a traditional object-oriented structure:
+- game
+- scenes
+- managers
+- lightweight entities
+
 
 ### What this means
 - ECS concepts are worth discussing now.
