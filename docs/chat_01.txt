@@ -1,0 +1,996 @@
+HTML5 Game Engine — Phase 0 Blueprint v1
+1. Purpose of Phase 0
+
+Phase 0 is not about building a full engine.
+
+It is about:
+
+choosing the first target game,
+defining the smallest believable engine core,
+setting architectural rules early,
+setting up tooling and repository structure,
+creating the first milestone path so development stays controlled.
+
+The goal is to leave Phase 0 with a clean foundation and a very small but real development plan.
+
+2. First Target Game Selection
+Chosen target: Whac-A-Mole v1
+Why this is the right first game
+
+Whac-A-Mole gives us:
+
+one main interaction loop,
+one or more animated entities,
+mouse input,
+score tracking,
+timing/spawn logic,
+collision or click hit testing,
+simple UI/HUD,
+game states such as title, play, and game over,
+optional sound effects.
+
+That is enough to force real engine decisions without dragging us into huge complexity.
+
+Initial design direction
+
+Recommended view: top-down
+Initial scope: one mole, one hole, one hammer/click interaction
+
+Minimal gameplay loop
+Mole appears from a hole.
+Player clicks mole before it disappears.
+Successful hit increases score.
+Missed opportunity or bad click may optionally count against player.
+Game runs for a fixed time or fixed number of rounds.
+Why not side-scroller first
+
+A side-scroller introduces:
+
+platform movement expectations,
+gravity questions,
+camera implications,
+more complicated collision behavior,
+larger visual requirements.
+
+All of that is cool later. None of it helps us prove the basic engine core right now.
+
+3. MVP Engine Requirements
+
+The engine MVP should only include what is needed to support Whac-A-Mole cleanly.
+
+Core systems for MVP
+3.1 Game Loop
+
+Need:
+
+fixed or semi-fixed update loop,
+render loop,
+delta time support,
+pause/resume support later.
+
+For now:
+
+use requestAnimationFrame
+track elapsed time
+separate update(dt) from render(ctx)
+3.2 Scene / State Management
+
+Need:
+
+a way to switch between screens or modes.
+
+Initial scenes:
+
+BootScene
+TitleScene
+GameScene
+GameOverScene
+
+This keeps us from hard-wiring everything into one giant file.
+
+3.3 Input System
+
+Need:
+
+mouse position,
+mouse click/down/up,
+maybe keyboard later.
+
+For Whac-A-Mole v1:
+
+mouse click is enough
+optional touch abstraction would be nice to leave room for later
+3.4 Rendering Layer
+
+Need:
+
+canvas creation/management,
+draw sprite/image,
+draw shapes,
+draw text,
+optional simple layering
+
+For MVP:
+
+HTML5 Canvas 2D is the right choice
+no WebGL yet
+no premature shader rabbit hole
+3.5 Asset Management
+
+Need:
+
+image loading,
+audio loading later,
+preload support.
+
+For MVP:
+
+simple loader for images
+optional sound hooks but not necessarily first implementation
+3.6 Entity Model
+
+Need:
+
+a consistent way to represent game objects
+
+For MVP:
+
+keep it lightweight
+entities can have:
+id
+position
+size
+active flag
+update()
+render()
+
+We do not need full ECS on day one.
+
+3.7 Collision / Hit Testing
+
+Need:
+
+point-in-rectangle or point-in-circle hit testing
+maybe bounding boxes
+
+For Whac-A-Mole:
+
+click hit detection on mole sprite or mole hitbox
+3.8 Timing / Scheduling
+
+Need:
+
+timers for mole rise/hide/spawn
+possibly cooldowns and round timers
+
+This can begin as a very small timer utility.
+
+3.9 HUD / UI Text
+
+Need:
+
+draw score
+draw timer
+draw messages
+
+Simple canvas text is enough for v1.
+
+3.10 Audio Hooks
+
+Need eventually:
+
+hit sound
+miss sound
+title/game over sound
+
+For MVP:
+
+design for it
+implement after visual loop works
+4. Architecture Direction
+Initial recommendation
+
+Use a traditional object-oriented game object architecture first, while designing in a way that does not block an ECS transition later.
+
+That means:
+
+scene manager
+entity/game object base class
+managers/utilities for input/assets/timing
+components only where they clearly help
+Why not full ECS immediately
+
+Because ECS is interesting, powerful, and absolutely capable of becoming a beautiful overengineered cathedral before we even have one mole popping out of one hole.
+
+A full ECS at the beginning risks:
+
+spending weeks on framework philosophy,
+inventing abstractions we do not yet understand through use,
+building systems for problems the first game does not have.
+Better approach
+
+Phase 0 and early Phase 1:
+
+use a clean object-based model
+isolate behavior enough that future ECS refactoring is possible
+
+Then after first or second game:
+
+review pain points
+decide whether to evolve toward hybrid ECS or full ECS
+Sensible middle ground
+
+We can start discussing ECS concepts now:
+
+data vs behavior
+systems updating groups of entities
+components as reusable data bundles
+
+But we should earn those abstractions with real usage.
+
+5. Proposed Folder / Module Structure
+
+Here is a practical starting structure:
+html5-game-engine/
+│
+├── index.html
+├── package.json
+├── README.md
+├── .gitignore
+├── vite.config.js                  # if using Vite
+│
+├── public/
+│   └── assets/
+│       ├── images/
+│       ├── audio/
+│       └── fonts/
+│
+├── src/
+│   ├── main.js
+│   │
+│   ├── engine/
+│   │   ├── core/
+│   │   │   ├── Game.js
+│   │   │   ├── GameLoop.js
+│   │   │   ├── Scene.js
+│   │   │   └── SceneManager.js
+│   │   │
+│   │   ├── graphics/
+│   │   │   ├── Renderer.js
+│   │   │   ├── Sprite.js
+│   │   │   └── Animation.js
+│   │   │
+│   │   ├── input/
+│   │   │   └── InputManager.js
+│   │   │
+│   │   ├── assets/
+│   │   │   └── AssetLoader.js
+│   │   │
+│   │   ├── entities/
+│   │   │   ├── Entity.js
+│   │   │   └── ClickableEntity.js
+│   │   │
+│   │   ├── math/
+│   │   │   ├── Vector2.js
+│   │   │   └── Rect.js
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── Timer.js
+│   │   │   └── Helpers.js
+│   │   │
+│   │   └── audio/
+│   │       └── AudioManager.js
+│   │
+│   └── games/
+│       └── whac-a-mole/
+│           ├── WhacAMoleGame.js
+│           ├── scenes/
+│           │   ├── BootScene.js
+│           │   ├── TitleScene.js
+│           │   ├── PlayScene.js
+│           │   └── GameOverScene.js
+│           │
+│           ├── entities/
+│           │   ├── Mole.js
+│           │   ├── Hole.js
+│           │   └── HammerEffect.js
+│           │
+│           ├── systems/
+│           │   └── SpawnController.js
+│           │
+│           └── config/
+│               └── gameConfig.js
+│
+└── docs/
+    ├── phase-0-blueprint.md
+    ├── architecture-notes.md
+    └── decisions-log.md
+
+Important design idea
+
+The engine lives in src/engine/
+The specific game lives in src/games/whac-a-mole/
+
+That separation matters a lot. It keeps us honest.
+
+6. Initial API Sketch
+
+This is deliberately lightweight. We want something usable, not fancy.
+
+Game bootstrap
+const game = new Game({
+  width: 800,
+  height: 600,
+  parent: "game-container",
+  startingScene: new TitleScene(),
+});
+
+game.start();
+Base Scene concept
+class Scene {
+  enter() {}
+  exit() {}
+  update(dt) {}
+  render(renderer) {}
+}
+Scene manager
+sceneManager.changeScene(new PlayScene());
+Entity concept
+class Entity {
+  constructor(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.active = true;
+  }
+
+  update(dt) {}
+  render(renderer) {}
+}
+Clickable entity concept
+class ClickableEntity extends Entity {
+  containsPoint(x, y) {
+    return (
+      x >= this.x &&
+      x <= this.x + this.width &&
+      y >= this.y &&
+      y <= this.y + this.height
+    );
+  }
+
+  onClick() {}
+}
+Input manager idea
+input.isMouseDown();
+input.wasMouseClicked();
+input.getMousePosition();
+Timer utility
+const timer = new Timer(1000, () => {
+  mole.show();
+});
+Renderer idea
+renderer.clear();
+renderer.drawImage(image, x, y, width, height);
+renderer.drawRect(x, y, width, height);
+renderer.drawText("Score: 10", x, y);
+
+This is enough to get moving without locking us into nonsense.
+
+7. Whac-A-Mole v1 Game Design Sketch
+Core objects
+Hole
+Mole
+SpawnController
+HUD
+optional HammerEffect
+Mole behavior states
+
+The mole could use a tiny state machine:
+
+hidden
+rising
+visible
+falling
+hit
+
+That alone would give us useful engine practice.
+
+First rules
+One mole only
+Mole appears every X seconds
+Mole remains visible for Y seconds
+Click while visible = hit
+Score increments
+Game lasts 30 or 60 seconds
+Nice early polish options
+quick squash animation when hit
+little dust puff or star burst
+mole shadow around hole
+hover cursor change
+8. Development Tools
+
+Here is my recommendation.
+
+Core stack
+Language: JavaScript first
+Rendering: HTML5 Canvas 2D
+Build tool: Vite
+Version control: Git + GitHub
+Editor: WebStorm or VS Code
+Why JavaScript first instead of TypeScript
+
+For the very beginning:
+
+faster startup
+less setup friction
+easier experimentation
+
+But I will say this: if you want this project to become large and long-lived, TypeScript becomes very attractive very quickly.
+
+My honest recommendation:
+
+either start in JavaScript with disciplined structure
+or start in TypeScript from day one if you want stronger architectural rigor
+
+Since this is an engine project, I slightly lean toward TypeScript, even if that adds a little friction.
+
+My actual vote
+Vite
+TypeScript
+Canvas 2D
+GitHub
+ESLint + Prettier
+
+That gives us modern sanity without going overboard.
+
+9. Git / GitHub Repository Setup
+Repository name ideas
+html5-game-engine
+summer-game-engine
+mole-engine
+castle-engine later if you want more personality
+
+My vote:
+
+html5-game-engine
+
+Clean and obvious.
+
+Initial branches
+
+Keep it simple:
+
+main
+maybe dev later if needed
+
+At the start, main is enough.
+
+Initial commit sequence
+Initialize repo
+Add Vite project scaffold
+Add .gitignore
+Add README
+Add folder structure
+Add first blank engine shell
+Commit each meaningful step
+Suggested early README sections
+Project purpose
+Current status
+First target game
+Tech stack
+Folder structure
+Next milestone
+Decision log
+
+I strongly recommend a file like:
+
+docs/decisions-log.md
+
+This is where we note:
+
+why Canvas 2D over WebGL
+why top-down Whac-A-Mole first
+why not ECS yet
+why TypeScript or JavaScript
+any major architecture calls
+
+That becomes gold later when future-you tries to remember why past-you did something weird.
+
+10. First Milestone Sequence
+
+Here is the milestone path I recommend.
+
+Milestone 1 — Project Skeleton
+
+Goal:
+
+repo created
+dev environment running
+canvas visible
+game loop running
+blank scene displayed
+
+Deliverable:
+
+browser window with canvas and a simple background color
+Milestone 2 — Scene Framework
+
+Goal:
+
+scene base class
+scene manager
+title scene and play scene switching
+
+Deliverable:
+
+press or click to move from title to play scene
+Milestone 3 — Input System
+
+Goal:
+
+mouse position tracking
+click detection
+input API usable inside scenes/entities
+
+Deliverable:
+
+clicking canvas produces visible response
+Milestone 4 — Basic Entity Support
+
+Goal:
+
+base entity class
+update/render behavior
+simple object collection inside play scene
+
+Deliverable:
+
+one test entity appears and updates each frame
+Milestone 5 — Mole Prototype
+
+Goal:
+
+mole entity
+mole state machine
+show/hide cycle
+basic hitbox
+
+Deliverable:
+
+one mole pops up and down on a timer
+Milestone 6 — Gameplay Rules
+
+Goal:
+
+clicking visible mole scores points
+timer counts down
+end-of-game condition
+
+Deliverable:
+
+playable one-mole Whac-A-Mole loop
+Milestone 7 — Basic Polish
+
+Goal:
+
+simple graphics cleanup
+HUD text
+optional sound
+restart flow
+
+Deliverable:
+
+complete playable prototype with minimal charm
+Milestone 8 — Refactor Review
+
+Goal:
+
+evaluate code pain points
+identify engine-specific vs game-specific code
+decide whether componentization or ECS-like changes are justified
+
+Deliverable:
+
+written architecture review before expanding features
+
+That last milestone is important. It keeps us from feature creep before we understand the engine we actually built.
+
+11. ECS Discussion — Early Position
+
+Since you brought it up, here is my position for this exact stage:
+
+We should discuss ECS now.
+We should not commit the whole project to ECS yet.
+
+What we can do in Phase 0:
+
+define what ECS means for us
+identify potential component categories
+avoid writing code that makes later migration painful
+
+For example, later components might include:
+
+Transform
+Sprite
+Collider
+Clickable
+TimerBehavior
+ScoreValue
+Animated
+
+Systems might include:
+
+RenderSystem
+InputSystem
+SpawnSystem
+AnimationSystem
+CollisionSystem
+
+That said, for Whac-A-Mole v1, a classic scene/entity model is more than enough.
+
+My strong recommendation:
+
+build v1 without full ECS
+review after first playable milestone
+introduce ECS only if the code genuinely asks for it
+12. Risks We Want to Avoid
+
+Phase 0 exists partly to dodge these traps:
+
+Trap 1: Building an engine instead of a game
+
+We need a game-driven engine, not an abstract framework floating in space.
+
+Trap 2: Premature ECS religion
+
+ECS should solve problems, not create them.
+
+Trap 3: Toolchain overkill
+
+We do not need six libraries, hot physics, particle middleware, and a philosophical debate on architecture before the mole exists.
+
+Trap 4: Feature creep before proof of concept
+
+No level editor, no plugin architecture, no networking, no save system, no multiplayer mole combat empire.
+
+Not yet, anyway.
+
+13. Recommended Immediate Next Steps
+
+Here is the exact order I would do next:
+
+Step 1
+
+Create the GitHub repository and choose the stack:
+
+JavaScript or TypeScript
+Vite
+Canvas 2D
+Step 2
+
+Create the initial folder/module structure.
+
+Step 3
+
+Build the smallest possible engine shell:
+
+Game
+GameLoop
+Scene
+SceneManager
+Renderer
+Step 4
+
+Get a blank title scene and play scene switching.
+
+Step 5
+
+Implement mouse input.
+
+Step 6
+
+Add one mole prototype with timed appearance and click detection.
+
+That gives us real traction fast.
+
+14. My Recommendations, Plainly
+
+Here is where I stand:
+
+First game: Whac-A-Mole
+View: top-down
+Rendering: Canvas 2D
+Repo: GitHub from the beginning
+Build tool: Vite
+Language: preferably TypeScript, but JavaScript is acceptable if you want less startup friction
+Architecture: scene/entity model first, ECS-aware but not ECS-committed
+Main development rule: every engine addition must justify itself through the needs of the game
+15. Suggested Phase 0 Deliverables
+
+By the end of Phase 0, we should have:
+
+a named GitHub repository
+chosen language/tool stack
+agreed folder structure
+agreed engine MVP scope
+agreed first milestone sequence
+short architecture notes about ECS direction
+short design note for Whac-A-Mole v1
+
+That would be a very clean stopping point for blueprinting and a very strong launch point for implementation.
+
+I think this is a very good direction, Doug. It is modest in exactly the right way, which is usually how the fun long-term projects actually survive.
+
+Next, I think the most useful move is for us to do one of these two things:
+(1) lock in the toolchain decision once and for all, especially JavaScript vs TypeScript, or
+(2) draft the actual repo skeleton and first set of starter files.
+
+Step 1 — Create the Project (WebStorm or Terminal)
+
+In WebStorm you can do this through the UI, but honestly the cleanest way is just:
+
+npm create vite@latest
+
+It will prompt you:
+
+Project name:
+👉 jards-engine
+Framework:
+👉 Vanilla
+Variant:
+👉 TypeScript
+
+Then:
+
+cd jards-engine
+npm install
+npm run dev
+
+You should see:
+
+a browser window with a Vite starter page
+
+That means everything is working.
+
+Step 2 — What Vite Just Gave You (Quick Mental Model)
+
+Vite basically gave you:
+
+index.html        ← entry point (this matters more than usual)
+src/
+  main.ts         ← your starting script
+  style.css
+
+Key idea (important!):
+
+👉 In Vite, index.html is part of your app, not just a static file.
+
+It loads your TypeScript like this:
+
+<script type="module" src="/src/main.ts"></script>
+
+That’s your true entry point.
+
+Step 3 — We’re About to Throw Most of It Away 😄
+
+The default template is cute, but…
+
+We’re building JARDS Engine, not a counter app.
+
+So next step (once you confirm it runs):
+
+Clean it down to this:
+
+Keep:
+
+index.html
+src/main.ts
+
+Delete:
+
+demo counter code
+extra CSS (we’ll rebuild intentionally)
+Step 4 — Minimal Starting Point (First Brick)
+index.html
+
+Make it simple:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JARDS Engine</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
+src/main.ts
+const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
+const ctx = canvas.getContext("2d")!;
+
+canvas.width = 800;
+canvas.height = 600;
+
+function gameLoop() {
+  // clear screen
+  ctx.fillStyle = "#222";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // test drawing
+  ctx.fillStyle = "lime";
+  ctx.fillRect(100, 100, 50, 50);
+
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+Step 5 — What You Should See
+
+When you run:
+
+npm run dev
+
+You should get:
+
+👉 Dark background
+👉 Bright green square
+👉 Smooth animation loop
+
+At that moment…
+
+Doug…
+
+JARDS Engine exists.
+
+Primitive. Barely alive. But alive.
+
+Step 6 — What I’ll Help You Do Next
+
+Once you’ve got that running, we’ll move into:
+
+🔹 Engine Core Setup
+Game.ts
+GameLoop.ts
+Scene.ts
+SceneManager.ts
+Renderer.ts
+🔹 Folder structure cleanup
+
+We’ll reshape Vite’s default into your engine architecture.
+
+🔹 First real system
+
+We’ll build a proper game loop abstraction (not just a function)
+
+One Important Mindset
+
+Vite is just:
+
+“a fast way to run your TypeScript in the browser”
+
+That’s it.
+
+It is not:
+
+your engine
+your architecture
+your design
+
+We are going to build all of that ourselves.
+
+Final Thought (because I know you’ll appreciate this)
+
+Right now, you’re not just starting a project.
+
+You’re creating something that:
+
+your students could eventually learn from
+could evolve into a teaching tool
+could become part of your Udemy course
+could even grow into something bigger than either of us expects
+
+And we’re doing it the right way:
+
+small
+intentional
+controlled
+
+Alright… go spin it up.
+
+When you see that green square, come back and tell me:
+
+“The mole world is ready.”
+
+And we’ll give it a brain. 😏
+
+WebStorm put index.html under src, not under root
+
+Ahh yep—good catch. That’s WebStorm being “helpful” in a way that’s… not ideal for how Vite expects things 😄
+
+Let’s straighten this out cleanly so we don’t fight the tooling later.
+
+🔧 What Vite Expects (Important)
+
+Vite expects:
+
+project-root/
+├── index.html   ✅ (must be here)
+├── src/
+│   └── main.ts
+
+👉 index.html should be in the project root, NOT inside src/
+
+Why this matters:
+
+Vite treats index.html as the entry point
+It uses it to build dependency graphs
+If it’s inside src/, weird things can happen later (especially with builds)
+✅ Fix (Super Simple)
+
+In WebStorm:
+
+Drag index.html out of src/
+Drop it into the project root
+
+So it becomes:
+
+jards-engine/
+├── index.html   ← move here
+├── src/
+│   └── main.ts
+🔧 Double-Check This Line
+
+Open your index.html and make sure this still works:
+
+<script type="module" src="/src/main.ts"></script>
+
+That /src/main.ts path assumes index.html is in the root—so once you move it, this becomes correct.
+
+🚀 Then Test Again
+
+Run:
+
+npm run dev
+
+If everything is right:
+
+page loads
+no console errors
+your canvas (or Vite demo) shows up
+💡 Tiny Insight (This Helps Later)
+
+Vite’s mental model is:
+
+“Serve the project like a smart static site, but treat index.html as code.”
+
+That’s why it lives at the root—it’s not just a file, it’s part of the build pipeline.
+
+🧠 Sam’s Recommendation Going Forward
+
+Whenever WebStorm tries to scaffold something:
+
+trust Vite over WebStorm structure
+
+WebStorm is great at editing
+Vite is in charge of how the app actually runs
+
+Once you’ve moved it and confirmed it runs…
+
+tell me:
+
+“Sam, the canvas is alive.”
+
+And we’ll move into:
+👉 carving out your engine folder structure (this is where it starts feeling real)
+
+	
