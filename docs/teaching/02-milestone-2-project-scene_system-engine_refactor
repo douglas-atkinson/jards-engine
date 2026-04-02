@@ -1,0 +1,250 @@
+🎓 TEACHING CAPTURE — MILESTONE 2 (Scene System + Engine Refactor)
+
+Now the project stops being a demo… and becomes a system.
+
+🎯 Learning Objectives
+
+Students should understand:
+
+what an Engine is and why it exists
+how to separate orchestration from behavior
+how a Scene system structures a game
+how to implement a scene lifecycle
+how to safely refactor code into a cleaner architecture
+how input triggers state transitions
+🧱 Lecture Outline
+1. The Problem: “Who’s in Charge?”
+
+Start with this question:
+
+“Right now… who is actually running the game?”
+
+Students will realize:
+
+main.ts is doing too much
+logic is scattered
+there is no clear “owner”
+
+💬 Key line:
+
+“Every non-trivial system needs a conductor.”
+
+2. Introducing the Engine
+
+Explain:
+
+Engine = central coordinator
+
+Responsibilities:
+
+owns the game loop
+owns the canvas and context
+tracks current scene
+controls transitions
+
+💬 Analogy:
+
+“The Engine is the conductor. It doesn’t play instruments—it tells everything when to play.”
+
+3. Refactoring the Game Loop
+
+Show:
+
+👉 loop in main.ts → moved into Engine.ts
+
+Explain:
+
+why this improves structure
+why centralizing timing matters
+
+💬 Key line:
+
+“Control belongs in one place.”
+
+4. Scene System — The Big Idea
+
+Define:
+
+A Scene = a self-contained part of the game
+
+Examples:
+
+title screen
+gameplay
+pause menu
+
+💬 Key line:
+
+“A game is just a sequence of scenes.”
+
+5. Scene Base Class (Contract)
+
+Introduce:
+
+update(dt)
+render(ctx)
+onEnter()
+onExit()
+
+Explain:
+
+This is not just code… it’s a contract
+
+💬 Analogy:
+
+“Every scene agrees to follow the same rules, even if they behave differently.”
+
+6. Scene Lifecycle
+
+Walk through:
+
+onEnter()
+repeated update()
+repeated render()
+onExit()
+
+💬 Key line:
+
+“Scenes don’t just exist—they transition.”
+
+7. Scene Switching
+
+Show:
+
+Engine.setScene()
+old scene exits
+new scene enters
+
+Explain:
+
+This is a state transition system
+
+💬 Key line:
+
+“This is your first real state machine.”
+
+8. Input Triggers Behavior
+
+Show:
+
+key press in TitleScene
+triggers transition to PlayScene
+
+Explain:
+
+input → decision → state change
+
+💬 Key line:
+
+“Input doesn’t just do things—it changes what system is active.”
+
+9. Clean Separation of Concerns
+
+Reinforce:
+
+Engine → orchestration
+Scene → behavior
+Systems → support (future milestones)
+
+💬 Key line:
+
+“Structure prevents chaos.”
+
+10. Architecture Walkthrough
+
+Walk through:
+
+main.ts (bootstrap only)
+Engine.ts (runtime control)
+Scene.ts (contract)
+TitleScene.ts
+PlayScene.ts
+
+This is a beautiful moment to zoom out.
+
+🎥 Live Coding Plan
+
+This one is really strong live.
+
+Suggested flow:
+
+Show messy loop in main.ts
+Move loop into Engine.ts
+Run → verify nothing broke
+Add Scene base class
+Add currentScene
+Add TitleScene
+Add PlayScene
+Wire scene switching (Enter key)
+Run → transition works
+
+👉 Students LOVE seeing the transition happen live
+
+🧪 Student Exercises
+Easy
+change title text
+change background colors
+Medium
+change key from Enter → Space
+add a second message in PlayScene
+Stretch
+add a way to return to TitleScene (Escape key)
+add a third scene (e.g., “Paused”)
+⚠️ Common Student Confusions
+“Why do we need an Engine class?”
+
+Answer:
+👉 Without it, control is scattered and scaling becomes painful
+
+“Why not just switch scenes directly in main?”
+
+Answer:
+👉 Because scenes should be self-contained and reusable
+
+“Why do we need onEnter/onExit?”
+
+Answer:
+👉 To safely manage:
+
+input listeners
+resources
+transitions
+“Why not just use global variables?”
+
+Answer:
+👉 Globals scale poorly and hide dependencies
+
+🧠 Instructor Notes
+
+This is a big milestone.
+
+Students are starting to see:
+
+real architecture
+real separation of concerns
+patterns used in actual engines
+
+What to emphasize:
+
+the refactor was intentional
+nothing “magical” happened—just organization
+this is how professionals build systems
+
+Encourage them:
+
+👉 “You just turned a script into an engine.”
+
+🎯 Key Takeaway Line
+
+If you only give them one sentence:
+
+“A game engine is a system that controls what runs, when it runs, and what is currently active.”
+
+💡 Final Suggestion
+
+After this milestone, your project now has:
+
+a real runtime core
+a state system
+clean separation of concerns
+extensible architecture

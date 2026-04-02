@@ -1,15 +1,19 @@
-import { Game } from "./engine/core/Game";
-import { BootScene } from "./games/whac-a-mole/scenes/BootScene";
+import Engine from './engine/Engine';
+import TitleScene from './scenes/TitleScene';
+import PlayScene from './scenes/PlayScene';
 
-function main(): void {
-    const game = new Game({
-        canvasId: "gameCanvas",
-        width: 800,
-        height: 600,
-        startingScene: new BootScene(),
-    });
+const canvas = document.querySelector('canvas') as HTMLCanvasElement | null;
 
-    game.start();
+if (!canvas) {
+    throw new Error('Canvas element not found.');
 }
 
-main();
+const engine = new Engine(canvas);
+const playScene = new PlayScene(engine);
+
+const titleScene = new TitleScene(engine, () => {
+    engine.setScene(playScene);
+});
+
+engine.setScene(titleScene);
+engine.start();
